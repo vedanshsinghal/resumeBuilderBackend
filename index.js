@@ -7,7 +7,10 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors({
-  origin: 'https://resumebuilder-opal-pi.vercel.app',
+  origin: [
+    'https://resumebuilder-opal-pi.vercel.app',
+    'http://localhost:5173'                    
+  ],
   credentials: true
 }));
 
