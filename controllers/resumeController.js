@@ -4,7 +4,7 @@ const Resume = require('../models/Resume');
 // @route   POST /api/resumes
 const saveResume = async (req, res) => {
   try {
-    // 1. The bouncer (middleware) attached the user's ID to req.user
+    // 1. The bouncer (protect middleware) attached the user's ID to req.user
     const userId = req.user.id;
 
     // 2. Check if this user already has a resume saved in the database

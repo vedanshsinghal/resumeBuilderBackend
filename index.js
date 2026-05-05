@@ -7,14 +7,14 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors({
-  origin: [
+  origin: [ //allow these to access backend
     'https://resumebuilder-opal-pi.vercel.app',
     'http://localhost:5173'                    
   ],
   credentials: true
 }));
 
-app.use(express.json());
+app.use(express.json()); 
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('Successfully connected to MongoDB Atlas'))

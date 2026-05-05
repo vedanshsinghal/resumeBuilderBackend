@@ -14,6 +14,13 @@ const register = async (req, res) => {
     }
 
     // 2. Hash the password
+    /* What is a Salt? Imagine two different users both use the password "qwerty".
+    If you just scrambled them, they would look exactly the same in the database.
+    A hacker could notice this pattern.
+    How it works: A "salt" generates a blast of random gibberish and glues it to
+    the password before scrambling it. This guarantees that even if 100 people use
+    the exact same password, every single one will look completely unique and
+    unrecognizable in your database. */
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -41,7 +48,7 @@ const login = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
-    }
+    }// status 400 = bad request
 
     // 2. Compare the provided password with the hashed password in the database
     const isMatch = await bcrypt.compare(password, user.password);
@@ -49,7 +56,7 @@ const login = async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // 3. Generate a JWT token
+    // 3. Generate a JWT token, user_.id is mongodb wali id
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
     res.status(200).json({ token, userId: user._id, name:user.name, email: user.email });
