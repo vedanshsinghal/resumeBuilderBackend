@@ -22,9 +22,11 @@ mongoose.connect(process.env.MONGO_URI)
 
 const authRoutes = require('./routes/authRoutes');
 const resumeRoutes = require('./routes/resumeRoutes'); 
+const analyseRoutes= require('./routes/analyseRoutes')
 
 app.use('/api/auth', authRoutes);
 app.use('/api/resumes', resumeRoutes); 
+app.use('/api/analyse',analyseRoutes)
 
 app.get('/', (req, res) => {
   res.send('Resume Builder API is running!');
