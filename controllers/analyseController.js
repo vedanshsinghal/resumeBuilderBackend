@@ -1,7 +1,6 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const generationConfig = { temperature: 0, responseMimeType: "application/json" };
 
 const deriveRubric = async (model, jobDescription) => {
     const prompt = `
@@ -11,7 +10,6 @@ const deriveRubric = async (model, jobDescription) => {
         - work_experience: relevance of past roles, seniority, domain
         - measurable_achievements: quantified impact, numbers, metrics
         - education_certifications: degree requirements, relevant certifications
-        - summary_alignment: how well the candidate's profile targets this role
 
         Job Description: ${jobDescription}
 
@@ -26,15 +24,16 @@ const deriveRubric = async (model, jobDescription) => {
                 "keyword_match": <int>,
                 "work_experience": <int>,
                 "measurable_achievements": <int>,
-                "education_certifications": <int>,
-                "summary_alignment": <int>
+                "education_certifications": <int>
             },
             "reasoning": "<one sentence explaining the distribution>"
         }
     `;
 
-    const result = await model.generateContent({ contents: prompt, generationConfig });
-    return JSON.parse(result.response.text());
+    const result = await model.generateContent(prompt);
+    const clean = result.response.text().replace(/```json/gi, "").replace(/```/gi, "").trim();
+    return JSON.parse(clean);
+
 };
 
 const scoreResume = async (model, resumeData, jobDescription, rubric) => {
@@ -56,8 +55,7 @@ const scoreResume = async (model, resumeData, jobDescription, rubric) => {
                 "keyword_match": <int>,
                 "work_experience": <int>,
                 "measurable_achievements": <int>,
-                "education_certifications": <int>,
-                "summary_alignment": <int>
+                "education_certifications": <int>
             },
             "score": <sum of rubric_scores>,
             "strengths": ["...", "...", "..."],
@@ -65,25 +63,25 @@ const scoreResume = async (model, resumeData, jobDescription, rubric) => {
         }
     `;
 
-    const result = await model.generateContent({ contents: prompt, generationConfig });
-    return JSON.parse(result.response.text());
+    const result = await model.generateContent(prompt);
+    const clean = result.response.text().replace(/```json/gi, "").replace(/```/gi, "").trim();
+    return JSON.parse(clean);
+
 };
 
 const analyseResume = async (req, res) => {
     try {
         const { resumeData, jobDescription } = req.body;
-        const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+        const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview", generationConfig: { temperature: 0 }});
 
         const rubric = await deriveRubric(model, jobDescription);
         const analysis = await scoreResume(model, resumeData, jobDescription, rubric);
 
-        res.status(200).json({
-            ...analysis,
-            rubric  // optional: send rubric to frontend so user can see why weights were set
-        });
+        res.status(200).json({ ...analysis, rubric });
 
     } catch (error) {
-        console.error("AI Analysis Error:", error);
+        console.error("AI Analysis Error:", error.message); // 👈 log the actual message
+        console.error(error.stack);                          // 👈 log the stack trace
         res.status(500).json({ error: "Failed to analyze resume" });
     }
 };
