@@ -41,6 +41,7 @@ const resumeSchema = new mongoose.Schema({
   project: [{
     time: { type: String, default: "" },
     title: { type: String, default: "" },
+    link: { type: String, default: "" },
     description: { type: String, default: "" }
   }],
   
@@ -63,6 +64,12 @@ const resumeSchema = new mongoose.Schema({
   por: [{
     por: { type: String, default: "" },
     description: { type: String, default: "" }
+  }],
+
+  // Matches const [ghost, setGhost]
+  ghost: [{
+    heading: { type: String, default: "" },
+    content: { type: String, default: "" }
   }]
 
 }, { timestamps: true });
